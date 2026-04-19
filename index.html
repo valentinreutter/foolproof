@@ -8,19 +8,50 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
+  /* Default theme: warm paper (light). Dark available via data-theme="dark". */
   :root {
-    --bg: #111210;
-    --bg-raised: #171814;
-    --fg: #e8e4d8;
-    --fg-dim: #a8a394;
-    --fg-mute: #6d6a5f;
-    --accent: #d4a574;
-    --rule: #2a2a24;
-    --warn: #c97b57;
-    --ok: #7fa35c;
+    --bg: #f2ede0;
+    --bg-raised: #e9e2d0;
+    --fg: #2b2721;
+    --fg-dim: #5f574b;
+    --fg-mute: #8d8578;
+    --accent: #94631f;
+    --accent-soft: #b48749;
+    --rule: #d4cbb3;
+    --warn: #a2522b;
+    --ok: #5b7a3c;
     --serif: "Fraunces", Georgia, "Times New Roman", serif;
     --sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
     --mono: "IBM Plex Mono", "Menlo", "Consolas", monospace;
+  }
+
+  [data-theme="dark"] {
+    --bg: #1b1a16;
+    --bg-raised: #23221d;
+    --fg: #d9d2c2;
+    --fg-dim: #9a9386;
+    --fg-mute: #615b51;
+    --accent: #c99968;
+    --accent-soft: #a37d52;
+    --rule: #2e2d27;
+    --warn: #b37054;
+    --ok: #819c5e;
+  }
+
+  /* Respect system preference on first visit, unless user has set one */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      --bg: #1b1a16;
+      --bg-raised: #23221d;
+      --fg: #d9d2c2;
+      --fg-dim: #9a9386;
+      --fg-mute: #615b51;
+      --accent: #c99968;
+      --accent-soft: #a37d52;
+      --rule: #2e2d27;
+      --warn: #b37054;
+      --ok: #819c5e;
+    }
   }
 
   html { scroll-behavior: smooth; }
@@ -30,24 +61,32 @@
     color: var(--fg);
     font-family: var(--serif);
     font-weight: 400;
-    font-size: 19px;
-    line-height: 1.65;
+    font-size: clamp(17px, 1.15vw, 19px);
+    line-height: 1.7;
     font-variation-settings: "opsz" 14;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    transition: background 0.25s ease, color 0.25s ease;
   }
 
   .shell {
-    max-width: 720px;
+    max-width: 760px;
     margin: 0 auto;
     padding: 72px 32px 140px;
+  }
+
+  /* On wide screens, give the column a bit more breathing room without inflating line length */
+  @media (min-width: 1400px) {
+    .shell { max-width: 800px; padding-top: 80px; }
   }
 
   /* Navigation */
   nav.toc {
     position: sticky;
     top: 0;
-    background: var(--bg);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--rule);
     padding: 14px 32px;
     font-family: var(--sans);
@@ -56,13 +95,32 @@
     margin: -72px -32px 72px;
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
+    gap: 20px;
   }
-  nav.toc a { color: var(--fg-dim); text-decoration: none; margin-left: 16px; letter-spacing: 0.02em; }
+  nav.toc a { color: var(--fg-dim); text-decoration: none; margin-left: 16px; letter-spacing: 0.02em; border-bottom: none; }
   nav.toc a:hover { color: var(--accent); }
-  nav.toc .brand { color: var(--fg); font-family: var(--serif); font-style: italic; font-size: 15px; }
-  .toc-links { overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  nav.toc .brand { color: var(--fg); font-family: var(--serif); font-style: italic; font-size: 15px; flex-shrink: 0; }
+  .toc-links { overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex: 1; min-width: 0; }
   .toc-links::-webkit-scrollbar { display: none; }
+
+  /* Theme toggle button */
+  .theme-toggle {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--fg-dim);
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color 0.2s, border-color 0.2s;
+    font-weight: 500;
+  }
+  .theme-toggle:hover { color: var(--fg); border-color: var(--accent); }
 
   /* Masthead */
   .masthead { text-align: center; padding: 60px 0 80px; border-bottom: 1px solid var(--rule); margin-bottom: 80px; }
@@ -179,7 +237,7 @@
   /* Typographic refinements */
   em { color: var(--fg); font-style: italic; }
   strong { font-weight: 600; color: var(--fg); }
-  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(212,165,116,0.3); transition: border 0.2s; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); transition: border 0.2s; }
   a:hover { border-bottom-color: var(--accent); }
   code, pre { font-family: var(--mono); font-size: 0.85em; }
   code { background: var(--bg-raised); padding: 2px 6px; border-radius: 3px; color: var(--accent); font-size: 0.82em; }
@@ -191,8 +249,8 @@
     border-left: 3px solid var(--accent);
     padding: 18px 24px;
     margin: 32px 0;
-    background: rgba(212,165,116,0.04);
-    font-size: 17px;
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    font-size: 0.95em;
   }
   .callout .label {
     font-family: var(--sans);
@@ -203,7 +261,7 @@
     margin-bottom: 10px;
     font-weight: 600;
   }
-  .callout.warn { border-left-color: var(--warn); background: rgba(201,123,87,0.05); }
+  .callout.warn { border-left-color: var(--warn); background: color-mix(in srgb, var(--warn) 8%, transparent); }
   .callout.warn .label { color: var(--warn); }
   .callout p:last-child { margin-bottom: 0; }
 
@@ -285,6 +343,17 @@
     nav.toc { margin: -48px -22px 48px; padding: 12px 22px; }
   }
 </style>
+<script>
+  // Run before render to prevent flash of wrong theme
+  (function() {
+    try {
+      var stored = localStorage.getItem('foolproof-theme');
+      if (stored === 'dark' || stored === 'light') {
+        document.documentElement.setAttribute('data-theme', stored);
+      }
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body>
 
@@ -299,6 +368,7 @@
     <a href="#resilience">Resilience</a>
     <a href="#appendix">Appendix</a>
   </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">Dark</button>
 </nav>
 
 <main class="shell">
@@ -1364,5 +1434,43 @@ vercel rollback --yes           # instant alias flip</code></pre>
 </footer>
 
 </main>
+
+<script>
+  (function() {
+    var root = document.documentElement;
+    var btn = document.getElementById('themeToggle');
+    if (!btn) return;
+
+    function currentTheme() {
+      var attr = root.getAttribute('data-theme');
+      if (attr === 'dark' || attr === 'light') return attr;
+      // No explicit theme: follow system
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function updateLabel() {
+      // Label shows the theme you will switch TO
+      btn.textContent = currentTheme() === 'dark' ? 'Light' : 'Dark';
+    }
+
+    btn.addEventListener('click', function() {
+      var next = currentTheme() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('foolproof-theme', next); } catch (e) {}
+      updateLabel();
+    });
+
+    updateLabel();
+
+    // Follow system changes if user hasn't explicitly set a theme
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+        var stored = null;
+        try { stored = localStorage.getItem('foolproof-theme'); } catch (e) {}
+        if (stored !== 'dark' && stored !== 'light') updateLabel();
+      });
+    }
+  })();
+</script>
 </body>
 </html>
