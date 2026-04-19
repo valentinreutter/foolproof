@@ -743,6 +743,7 @@ Foolproof
     <ol>
       <li><a href="#ch12"><span class="ch-num">12</span>Verify gates &amp; patterns</a></li>
       <li><a href="#ch13"><span class="ch-num">13</span>Production correspondence</a></li>
+      <li><a href="#invisible-git"><span class="ch-num">13+</span>Invisible git protocol</a></li>
       <li><a href="#ch14"><span class="ch-num">14</span>Bridges &amp; supply chain</a></li>
     </ol>
   </li>
@@ -1297,12 +1298,12 @@ Foolproof
 
 <div class="callout info">
 <div class="title">The meta-pattern: setup as literate markdown</div>
-<p>Write the setup as a markdown document where each step is both human-readable prose and an executable code block. Use Runme in VS Code to turn the document into an executable runbook: you review, you run (or watch the agent run with Claude Code plan mode showing you what it will do first), and output appears inline in the document as a receipt. The document is the documentation, the documentation is the script, nothing drifts because nothing is duplicated. This book's seven-day setup translates directly into such a runbook.</p>
+<p>Write the setup as a markdown document where each step is both human-readable and executable. The document is the documentation; nothing drifts because nothing is duplicated. Ask Claude Code to run each step in plan mode — you review, it executes, the output becomes the receipt.</p>
 </div>
 
 <h3>Before you start</h3>
 
-<p>Assumptions for this chapter. A clean macOS install. A YubiKey 5C NFC ordered with a backup key — one for daily, one for a sealed envelope. A credit card. About two hours of focused time per day for seven days. If any of those are missing, pause here.</p>
+<p>Assumptions for this chapter. A Mac running macOS (no clean install needed). A YubiKey 5C NFC ordered with a backup key — one for daily, one for a sealed envelope. A credit card. About two hours of focused time per day for seven days. If any of those are missing, pause here.</p>
 
 <div class="step-box" id="day-1">
 <div class="step-head">Day 1 — Identity<span class="step-time">90 minutes</span></div>
@@ -1329,9 +1330,7 @@ Foolproof
 
 <div class="stack-item"><strong>Path B — move DNS to Cloudflare, use Cloudflare Email Routing.</strong> Best practice. Cloudflare's DNS is faster and more inspectable. Email Routing is free, supports wildcards (everything@yourdomain.com to one inbox), and has better deliverability analytics. You point Porkbun's nameservers at Cloudflare's; Cloudflare manages everything downstream.</div>
 
-<p><em>What is a nameserver?</em> Your domain needs to tell the internet where to find its records — its mail servers, its website, its aliases. The default answer is "the registrar where you bought it." You can override this by pointing your domain at a different provider's nameservers. This is what you do to move DNS from Porkbun to Cloudflare. It's a one-time operation that takes a few hours to propagate.</p>
-
-<p>Path B requires a Cloudflare account (free) and one propagation wait. If you're starting fresh and have the patience for path B, take it. If you want the simplest working setup, take path A and migrate later when it's worth the 30 minutes.</p>
+<p>Path B requires a Cloudflare account (free) and one DNS propagation wait (a few hours). If you want the simplest working setup, take path A and migrate later.</p>
 
 <h4>1.3 · Create your main forward (10 min)</h4>
 
@@ -1478,9 +1477,9 @@ shopping@        → e-commerce (disposable)</code></pre>
 <div class="callout warning">
 <div class="title">Files you already keep in the cloud — what backup won't touch</div>
 <p>Time Machine and Arq back up what is <em>on the Mac</em>. Files that live only in a cloud service (Mega, Google Drive cloud-only, Dropbox smart-sync) are not seen by either tool unless you've downloaded them locally. If your cloud account has files bigger than your SSD, you have three real options, in order of honesty:</p>
-<p><strong>(A) Accept the cloud account as single-copy.</strong> Fine for old archives you rarely touch. Risk: vendor outage, account compromise, or policy change = loss. Document the decision in your vault so you know it's a known residual risk, not a gap you forgot about.</p>
-<p><strong>(B) Larger external SSD → download locally → back up both locally and to B2.</strong> Proper 3-2-1. Costs a weekend and an external drive. Right answer for irreplaceable files (your recordings, originals of creative work).</p>
-<p><strong>(C) Cloud-to-cloud backup via rclone.</strong> Tool that copies directly from one cloud to another, never touching your Mac. Two cloud copies, neither depends on local disk. Takes ~30 minutes to set up; runs on a schedule. Tier B (no GUI) but effective. Right answer for archives too large for your SSD but important enough for defense in depth.</p>
+<p><strong>(A) Accept the cloud account as single-copy.</strong> Fine for old archives you rarely touch; document it as a known residual risk, not a gap you forgot.</p>
+<p><strong>(B) Download locally, back up to both Time Machine and B2.</strong> Proper 3-2-1. Right answer for irreplaceable files. Costs an external SSD and a weekend.</p>
+<p><strong>(C) Cloud-to-cloud via rclone.</strong> Copies from one cloud to another without touching your Mac. ~30 minutes to set up. Right answer for archives too large to download but important enough for defense in depth.</p>
 </div>
 
 </div>
@@ -2415,11 +2414,9 @@ Report divergences. Do not fix anything; just report.</code></pre>
 
 I'll tell you what to do next. Do not act.</code></pre>
 
-<h3>How to use this library</h3>
-
-<p>Print the prompts. Keep them next to your keyboard, or in a pinned note in Basic Memory, or as named slash commands in Claude Code. Paste them directly — they are not meant to be remembered, they are meant to be available.</p>
-
-<p>They will evolve. Some will date as Claude changes. The invariants behind them (Chapter 8) won't. When a prompt stops working well, ask: is the invariant still valid (yes), and if so, what changed about how to express it? Update the prompt; keep the principle.</p>
+<div class="callout info">
+<p>Keep these prompts in a pinned note in Basic Memory or as slash commands in Claude Code. Paste directly — they are meant to be available, not memorised. When a prompt stops working, the invariant behind it (Chapter 8) still holds; update the wording, keep the principle.</p>
+</div>
 
 <!-- ============================================================ -->
 <!-- PART V                                                        -->
@@ -2555,6 +2552,25 @@ in one sentence what you see without speculating about cause.
 Paste raw data; I'll read it.</code></pre>
 
 <p>Claude composes across all four MCP servers and returns one paragraph. You read it in a minute and either go about your day or dig in.</p>
+
+
+<h3 id="invisible-git">The invisible git protocol</h3>
+
+<p>For frontend work, GitHub becomes silent infrastructure the agent manages. Your review surface is a chat window, a before/after screenshot, and a preview URL. You never read a diff.</p>
+
+<p>Three Vercel CLI commands replace the entire PR cycle:</p>
+
+<pre><code>vercel deploy --yes --no-wait   # preview URL, no commit required
+vercel promote &lt;url&gt; --yes      # promote to production
+vercel rollback --yes           # instant alias flip, no rebuild</code></pre>
+
+<p>After a one-time <code>vercel link</code>, the agent deploys a preview from any file change, shows you the URL, waits for approval, then promotes. Add the Vercel MCP with <code>claude mcp add --transport http vercel https://mcp.vercel.com</code> so the agent can retrieve deployment status and build logs without leaving the chat.</p>
+
+<p>The verification discipline: the agent takes a before screenshot, makes the edit, takes an after screenshot, and opens both side by side before asking for approval. The before state is not optional &#8212; without it, correspondence cannot be checked. Point Playwright at the preview URL, not production. Scope the Supabase MCP to a staging project ref with <code>?read_only=true</code> until you explicitly authorise write access.</p>
+
+<div class="callout principle">
+<strong>Known issue (April 2026).</strong> Playwright MCP versions 0.0.56&#8211;0.0.61 break tool discovery in Claude Code 2.0/2.1.x. Pin with: <code>claude mcp add playwright npx @playwright/mcp@0.0.41</code>
+</div>
 
 <!-- CH 14 -->
 <h2 id="ch14"><span class="ch-label">Chapter 14</span>Bridges and supply chain</h2>
